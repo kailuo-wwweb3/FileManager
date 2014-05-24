@@ -4,6 +4,7 @@ var fs = require('fs');
 var mime = require('mime');
 var path = require('path');
 var cache = {};
+var files = [];
 
 var server = http.createServer(function(req, res) {
 	var filePath = false;
@@ -22,6 +23,12 @@ var server = http.createServer(function(req, res) {
 			break;
 
 		case 'GET':
+			var body = files.map(function(item, i) {
+				return i + ')' + item;
+			}).join('\n');
+			res.setHeader('Content-Length', Buffer.byteLength(body));
+			res.setHeader('Content-Type', 'text/plain', charset="utf-8");
+			res.end(body);
 			break;
 
 		case 'DELETE':
@@ -46,6 +53,13 @@ function upload(req, res) {
 	form.on('file', function(name, file) {
 		console.log(name);
 		console.log(file);
+		fs.write(file, 'files', function(err, written, buffer) {
+			if (err) {
+				console.log('error when saving files');
+			} else {
+				console.log(written);
+			}
+		});
 	});
 	form.on('end', function() {
 		res.end('upload complete;');
